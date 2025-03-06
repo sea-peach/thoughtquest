@@ -1,4 +1,4 @@
-const { Plugin, Notice, Modal, Setting } = require("obsidian");
+const { Plugin, Notice, Modal, Setting, PluginSettingTab } = require("obsidian");
 
 class ThoughtQuest extends Plugin {
     async onload() {
