@@ -14,8 +14,7 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-|   |
-|---|
-|body {|
-|color: red;|
-|}|
+
+body {
+color: red;
+}
