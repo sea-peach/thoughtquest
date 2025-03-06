@@ -6,47 +6,18 @@ if you want to view the source, please visit the github repository of this plugi
 
 */
 
-  
 
-var c = Object.defineProperty; var p = Object.getOwnPropertyDescriptor; var r = Object.getOwnPropertyNames; var g = Object.prototype.hasOwnProperty; var h = (n, t) => { for (var i in t) c(n, i, { get: t[i], enumerable: !0 }) }, u = (n, t, i, a) => { if (t && typeof t == "object" || typeof t == "function") for (let e of r(t)) !g.call(n, e) && e !== i && c(n, e, { get: () => t[e], enumerable: !(a = p(t, e)) || a.enumerable }); return n }; var w = n => u(c({}, "__esModule", { value: !0 }), n); var y = {}; h(y, { default: () => o }); module.exports = w(y); var s = require("obsidian"), S = { mySetting: "default" }, o = class extends s.Plugin{ async onload() { await this.loadSettings(), this.addRibbonIcon("dice", "Sample Plugin", e => { new s.Notice("This is a notice!") }).addClass("my-plugin-ribbon-class"), this.addStatusBarItem().setText("Status Bar Text"), this.addCommand({ id: "open-sample-modal-simple", name: "Open sample modal (simple)", callback: () => { new l(this.app).open() } }), this.addCommand({ id: "sample-editor-command", name: "Sample editor command", editorCallback: (e, m) => { console.log(e.getSelection()), e.replaceSelection("Sample Editor Command") } }), this.addCommand({ id: "open-sample-modal-complex", name: "Open sample modal (complex)", checkCallback: e => { if (this.app.workspace.getActiveViewOfType(s.MarkdownView)) return e || new l(this.app).open(), !0 } }), this.addSettingTab(new d(this.app, this)), this.registerDomEvent(document, "click", e => { console.log("click", e) }), this.registerInterval(window.setInterval(() => console.log("setInterval"), 5 * 60 * 1e3)) } onunload() { } async loadSettings() { this.settings = Object.assign({}, S, await this.loadData()) } async saveSettings() { await this.saveData(this.settings) } }, l = class extends s.Modal{ constructor(t) { super(t) } onOpen() { let { contentEl: t } = this; t.setText("Woah!") } onClose() { let { contentEl: t } = this; t.empty() } }, d = class extends s.PluginSettingTab{ constructor(i, a) { super(i, a); this.plugin = a } display() { let { containerEl: i } = this; i.empty(), new s.Setting(i).setName("Setting #1").setDesc("It's a secret").addText(a => a.setPlaceholder("Enter your secret").setValue(this.plugin.settings.mySetting).onChange(async e => { this.plugin.settings.mySetting = e, await this.plugin.saveSettings() })) } };
 
+var c = Object.defineProperty; var p = Object.getOwnPropertyDescriptor; var r = Object.getOwnPropertyNames; var g = Object.prototype.hasOwnProperty; var h = (n, t) => { for (var i in t) c(n, i, { get: t[i], enumerable: !0 }) }, u = (n, t, i, a) => { if (t && typeof t == "object" || typeof t == "function") for (let e of r(t)) !g.call(n, e) && e !== i && c(n, e, { get: () => t[e], enumerable: !(a = p(t, e)) || a.enumerable }); return n }; var w = n => u(c({}, "__esModule", { value: !0 }), n); var y = {}; h(y, { default: () => o }); module.exports = w(y); var s = require("obsidian"), S = { mySetting: "default" }, o = class extends s.Plugin { async onload() { await this.loadSettings(), this.addRibbonIcon("dice", "Sample Plugin", e => { new s.Notice("This is a notice!") }).addClass("my-plugin-ribbon-class"), this.addStatusBarItem().setText("Status Bar Text"), this.addCommand({ id: "open-sample-modal-simple", name: "Open sample modal (simple)", callback: () => { new l(this.app).open() } }), this.addCommand({ id: "sample-editor-command", name: "Sample editor command", editorCallback: (e, m) => { console.log(e.getSelection()), e.replaceSelection("Sample Editor Command") } }), this.addCommand({ id: "open-sample-modal-complex", name: "Open sample modal (complex)", checkCallback: e => { if (this.app.workspace.getActiveViewOfType(s.MarkdownView)) return e || new l(this.app).open(), !0 } }), this.addSettingTab(new d(this.app, this)), this.registerDomEvent(document, "click", e => { console.log("click", e) }), this.registerInterval(window.setInterval(() => console.log("setInterval"), 5 * 60 * 1e3)) } onunload() { } async loadSettings() { this.settings = Object.assign({}, S, await this.loadData()) } async saveSettings() { await this.saveData(this.settings) } }, l = class extends s.Modal { constructor(t) { super(t) } onOpen() { let { contentEl: t } = this; t.setText("Woah!") } onClose() { let { contentEl: t } = this; t.empty() } }, d = class extends s.PluginSettingTab { constructor(i, a) { super(i, a); this.plugin = a } display() { let { containerEl: i } = this; i.empty(), new s.Setting(i).setName("Setting #1").setDesc("It's a secret").addText(a => a.setPlaceholder("Enter your secret").setValue(this.plugin.settings.mySetting).onChange(async e => { this.plugin.settings.mySetting = e, await this.plugin.saveSettings() })) } };
 const { Plugin } = require("obsidian");
 
-export default class ThoughtQuest extends Plugin {
+class ThoughtQuest extends Plugin {
     async onload() {
         console.log("⚔️ ThoughtQuest Plugin Loaded! 🚀");
-
-        // Load XP or set to 0 if no XP exists
-        this.xp = (await this.loadData())?.xp || 0;
-
-        // Create a command to check XP
-        this.addCommand({
-            id: "check-xp",
-            name: "Check XP",
-            callback: () => {
-                new XPNotice(this.app, this.xp);
-            },
-        });
-
-        // Track when a note is created or modified
-        this.registerEvent(this.app.vault.on("modify", this.gainXP.bind(this)));
     }
 
-    async gainXP() {
-        this.xp += 10; // Give 10 XP per note modification
-        await this.saveData({ xp: this.xp });
-        console.log(`Gained XP! Current XP: ${this.xp}`);
-    }
-
-    async onunload() {
+    onunload() {
         console.log("⚔️ ThoughtQuest Plugin Unloaded.");
-    }
-}
-
-// Small popup to show XP in Obsidian
-class XPNotice {
-    constructor(app, xp) {
-        new Notice(`⚡ ThoughtQuest XP: ${xp}`);
     }
 }
 
