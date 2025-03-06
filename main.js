@@ -93,16 +93,63 @@ class ThoughtQuest extends Plugin {
     createXPPanel() {
         this.xpPanel = document.createElement("div");
         this.xpPanel.id = "thoughtquest-xp-panel";
-
+    
         this.xpPanel.innerHTML = `
+            <div id="xp-panel-header">⚔️ ThoughtQuest</div>
             <div id="xp-panel-content">
                 <span id="xp-level">⚔️ Level ${this.level}</span>
                 <span id="xp-count">${this.xp} XP</span>
             </div>
         `;
-
+    
         document.body.appendChild(this.xpPanel);
+    
+        // Load saved position (default to top-right)
+        let savedPosition = this.settings.xpPanelPosition || { top: "20px", left: "auto", right: "20px" };
+        Object.assign(this.xpPanel.style, savedPosition);
+    
         this.updateXPPanel();
+    
+        // Make panel draggable
+        this.makePanelDraggable(this.xpPanel);
+    }
+    
+    makePanelDraggable(panel) {
+        let offsetX, offsetY, isDragging = false;
+    
+        const header = panel.querySelector("#xp-panel-header");
+    
+        header.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - panel.offsetLeft;
+            offsetY = e.clientY - panel.offsetTop;
+            panel.style.transition = "none"; // Disable animation while dragging
+        });
+    
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            let x = e.clientX - offsetX;
+            let y = e.clientY - offsetY;
+    
+            panel.style.left = `${x}px`;
+            panel.style.top = `${y}px`;
+            panel.style.right = "auto"; // Reset right to allow free positioning
+        });
+    
+        document.addEventListener("mouseup", async () => {
+            if (isDragging) {
+                isDragging = false;
+                panel.style.transition = "0.3s ease-in-out"; // Re-enable animation
+    
+                // Save new position to settings
+                this.settings.xpPanelPosition = {
+                    top: panel.style.top,
+                    left: panel.style.left,
+                    right: panel.style.right
+                };
+                await this.saveData(this.settings);
+            }
+        });
     }
 
     updateXPPanel() {
