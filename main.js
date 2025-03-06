@@ -49,3 +49,5 @@ class XPNotice {
         new Notice(`⚡ ThoughtQuest XP: ${xp}`);
     }
 }
+
+module.exports = ThoughtQuest;
