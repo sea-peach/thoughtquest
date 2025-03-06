@@ -12,10 +12,6 @@ class ThoughtQuest extends Plugin {
             showXPPanel: true, // NEW: Toggle for floating XP panel
         }, await this.loadData());
 
-        // Load XP & Level
-        let savedData = await this.loadData();
-        this.xp = savedData?.xp || 0;
-        this.level = Math.floor(this.xp / this.settings.xpPerLevel);
 
         // Create XP Bar if enabled
         if (this.settings.showXPBar) {
