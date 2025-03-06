@@ -3,5 +3,10 @@
   "xpPerLevel": 100,
   "showXPBar": true,
   "showXPPanel": true,
-  "xp": 10
+  "xp": 10,
+  "xpPanelPosition": {
+    "top": "521px",
+    "left": "380px",
+    "right": "auto"
+  }
 }

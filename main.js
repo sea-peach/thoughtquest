@@ -53,21 +53,75 @@ class ThoughtQuest extends Plugin {
 
         // Add settings tab
         this.addSettingTab(new ThoughtQuestSettingTab(this.app, this));
+    
+        this.achievements = {
+            "first-edit": { title: "📜 The First Step", desc: "Modify a note for the first time.", unlocked: false },
+            "deep-thinker": { title: "🧠 Deep Thinker", desc: "Reach 500 XP.", unlocked: false },
+            "cosmic-cartographer": { title: "🌌 Cosmic Cartographer", desc: "Reach 1000 XP.", unlocked: false },
+            "philosopher-king": { title: "👑 Philosopher King", desc: "Reach 5000 XP.", unlocked: false }
+        };
+        
+        // Load achievements from saved data
+        let savedData = await this.loadData();
+        this.xp = savedData?.xp || 0;
+        this.level = Math.floor(this.xp / this.settings.xpPerLevel);
+        this.achievements = Object.assign(this.achievements, savedData?.achievements || {});
+        
+        // Check if we need to unlock any achievements
+        this.checkAchievements();
+    
+    }
+    
+    async checkAchievements() {
+        let unlocked = false;
+    
+        if (!this.achievements["first-edit"].unlocked && this.xp > 0) {
+            this.unlockAchievement("first-edit");
+            unlocked = true;
+        }
+    
+        if (!this.achievements["deep-thinker"].unlocked && this.xp >= 500) {
+            this.unlockAchievement("deep-thinker");
+            unlocked = true;
+        }
+    
+        if (!this.achievements["cosmic-cartographer"].unlocked && this.xp >= 1000) {
+            this.unlockAchievement("cosmic-cartographer");
+            unlocked = true;
+        }
+    
+        if (!this.achievements["philosopher-king"].unlocked && this.xp >= 5000) {
+            this.unlockAchievement("philosopher-king");
+            unlocked = true;
+        }
+    
+        if (unlocked) {
+            await this.saveData({ xp: this.xp, achievements: this.achievements });
+        }
     }
     
     async gainXP() {
         this.xp += this.settings.xpPerEdit;
-        await this.saveData({ xp: this.xp });
-
+        await this.saveData({ xp: this.xp, achievements: this.achievements });
+    
         let newLevel = Math.floor(this.xp / this.settings.xpPerLevel);
         if (newLevel > this.level) {
             this.level = newLevel;
             new Notice(`🎉 Level Up! You reached Level ${this.level} ⚡`);
         }
-
+    
         console.log(`Gained XP! Current XP: ${this.xp}`);
         this.updateXPBar();
         this.updateXPPanel();
+    
+        // Check if a new achievement should be unlocked
+        this.checkAchievements();
+    }
+
+    unlockAchievement(key) {
+        this.achievements[key].unlocked = true;
+        new Notice(`🏆 Achievement Unlocked: ${this.achievements[key].title}\n${this.achievements[key].desc}`);
+        console.log(`🏆 Unlocked: ${this.achievements[key].title}`);
     }
 
     createXPBar() {
@@ -193,6 +247,16 @@ class ThoughtQuestSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName("XP per Level")
+            .setDesc("XP required to level up.")
+            .addText(text => text
+                .setValue(this.plugin.settings.xpPerLevel.toString())
+                .onChange(async (value) => {
+                    this.plugin.settings.xpPerLevel = parseInt(value) || 100;
+                    await this.plugin.saveData(this.plugin.settings);
+                }));
+
+        new Setting(containerEl)
             .setName("Show Floating XP Panel")
             .setDesc("Enable or disable the floating XP tracker.")
             .addToggle(toggle => toggle
@@ -205,6 +269,31 @@ class ThoughtQuestSettingTab extends PluginSettingTab {
                     } else {
                         this.plugin.xpPanel?.remove();
                     }
+                }));
+
+        new Setting(containerEl)
+            .setName("Show XP Progress Bar")
+            .setDesc("Enable or disable the XP progress bar at the bottom.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showXPBar)
+                .onChange(async (value) => {
+                    this.plugin.settings.showXPBar = value;
+                    await this.plugin.saveData(this.plugin.settings);
+                    if (value) {
+                        this.plugin.createXPBar();
+                    } else {
+                        this.plugin.xpBarContainer?.remove();
+                    }
+                }));
+
+        new Setting(containerEl)
+            .setName("Show Achievements in Dashboard")
+            .setDesc("Enable or disable achievement tracking in the ThoughtQuest dashboard.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showAchievements)
+                .onChange(async (value) => {
+                    this.plugin.settings.showAchievements = value;
+                    await this.plugin.saveData(this.plugin.settings);
                 }));
     }
 }
