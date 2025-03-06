@@ -9,6 +9,7 @@ class ThoughtQuest extends Plugin {
             xpPerEdit: 10,
             xpPerLevel: 100,
             showXPBar: true,
+            showXPPanel: true, // NEW: Toggle for floating XP panel
         }, await this.loadData());
 
         // Load XP & Level
@@ -19,6 +20,11 @@ class ThoughtQuest extends Plugin {
         // Create XP Bar if enabled
         if (this.settings.showXPBar) {
             this.createXPBar();
+        }
+
+        // NEW: Create the floating XP panel
+        if (this.settings.showXPPanel) {
+            this.createXPPanel();
         }
 
         // Update XP when modifying a note
@@ -33,6 +39,7 @@ class ThoughtQuest extends Plugin {
             callback: () => {
                 new Notice(`⚡ ThoughtQuest XP: ${this.xp}`);
                 this.updateXPBar();
+                this.updateXPPanel();
             },
         });
 
@@ -60,6 +67,7 @@ class ThoughtQuest extends Plugin {
 
         console.log(`Gained XP! Current XP: ${this.xp}`);
         this.updateXPBar();
+        this.updateXPPanel();
     }
 
     createXPBar() {
@@ -81,36 +89,36 @@ class ThoughtQuest extends Plugin {
         this.xpFill.style.width = `${progress}%`;
     }
 
+    // NEW: Create a Floating XP Panel
+    createXPPanel() {
+        this.xpPanel = document.createElement("div");
+        this.xpPanel.id = "thoughtquest-xp-panel";
+
+        this.xpPanel.innerHTML = `
+            <div id="xp-panel-content">
+                <span id="xp-level">⚔️ Level ${this.level}</span>
+                <span id="xp-count">${this.xp} XP</span>
+            </div>
+        `;
+
+        document.body.appendChild(this.xpPanel);
+        this.updateXPPanel();
+    }
+
+    updateXPPanel() {
+        if (!this.xpPanel) return;
+        document.getElementById("xp-count").innerText = `${this.xp} XP`;
+        document.getElementById("xp-level").innerText = `⚔️ Level ${this.level}`;
+    }
+
     async onunload() {
         console.log("⚔️ ThoughtQuest Plugin Unloaded.");
         if (this.xpBarContainer) {
             this.xpBarContainer.remove();
         }
-    }
-}
-
-// 🎯 ThoughtQuest Dashboard 🎯
-class ThoughtQuestDashboard extends Modal {
-    constructor(app, xp, level, settings) {
-        super(app);
-        this.xp = xp;
-        this.level = level;
-        this.settings = settings;
-    }
-
-    onOpen() {
-        let { contentEl } = this;
-        contentEl.empty();
-        contentEl.createEl("h2", { text: "⚔️ ThoughtQuest Dashboard ⚡" });
-        contentEl.createEl("p", { text: `XP: ${this.xp}` });
-        contentEl.createEl("p", { text: `Level: ${this.level}` });
-
-        let nextLevelXP = (this.level + 1) * this.settings.xpPerLevel;
-        let xpRemaining = nextLevelXP - this.xp;
-        contentEl.createEl("p", { text: `Next Level: ${xpRemaining} XP away!` });
-
-        let closeButton = contentEl.createEl("button", { text: "Close" });
-        closeButton.onclick = () => this.close();
+        if (this.xpPanel) {
+            this.xpPanel.remove();
+        }
     }
 }
 
@@ -127,7 +135,6 @@ class ThoughtQuestSettingTab extends PluginSettingTab {
 
         containerEl.createEl("h2", { text: "⚔️ ThoughtQuest Settings ⚡" });
 
-        // XP Per Edit
         new Setting(containerEl)
             .setName("XP per Note Edit")
             .setDesc("How much XP you gain each time you modify a note.")
@@ -138,30 +145,18 @@ class ThoughtQuestSettingTab extends PluginSettingTab {
                     await this.plugin.saveData(this.plugin.settings);
                 }));
 
-        // XP Per Level
         new Setting(containerEl)
-            .setName("XP per Level")
-            .setDesc("XP required to level up.")
-            .addText(text => text
-                .setValue(this.plugin.settings.xpPerLevel.toString())
-                .onChange(async (value) => {
-                    this.plugin.settings.xpPerLevel = parseInt(value) || 100;
-                    await this.plugin.saveData(this.plugin.settings);
-                }));
-
-        // Toggle XP Bar
-        new Setting(containerEl)
-            .setName("Show XP Bar")
-            .setDesc("Enable or disable the XP progress bar.")
+            .setName("Show Floating XP Panel")
+            .setDesc("Enable or disable the floating XP tracker.")
             .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.showXPBar)
+                .setValue(this.plugin.settings.showXPPanel)
                 .onChange(async (value) => {
-                    this.plugin.settings.showXPBar = value;
+                    this.plugin.settings.showXPPanel = value;
                     await this.plugin.saveData(this.plugin.settings);
                     if (value) {
-                        this.plugin.createXPBar();
+                        this.plugin.createXPPanel();
                     } else {
-                        this.plugin.xpBarContainer?.remove();
+                        this.plugin.xpPanel?.remove();
                     }
                 }));
     }
