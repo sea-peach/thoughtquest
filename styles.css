@@ -15,23 +15,32 @@ If your plugin does not need CSS, delete this file.
 */
 
 /* XP Progress Bar */
-#thoughtquest-xp-bar {
+#thoughtquest-xp-panel {
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 250px;
-    height: 12px;
-    background-color: rgba(50, 50, 50, 0.8);
-    border-radius: 6px;
-    overflow: hidden;
-    border: 2px solid #ffcc00;
-    z-index: 1000; /* Ensures it's above other UI elements */
+    top: 20px;
+    right: 20px;
+    background: rgba(30, 30, 30, 0.85);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: sans-serif;
+    box-shadow: 0px 0px 10px rgba(255, 204, 0, 0.6);
+    z-index: 1000;
 }
 
-#thoughtquest-xp-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #ff9800, #ffcc00);
-    transition: width 0.3s ease-in-out;
+#xp-panel-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#xp-level {
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+#xp-count {
+    font-size: 12px;
+    margin-top: 2px;
 }

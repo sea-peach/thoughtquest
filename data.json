@@ -1,3 +1,7 @@
 {
+  "xpPerEdit": 10,
+  "xpPerLevel": 100,
+  "showXPBar": true,
+  "showXPPanel": true,
   "xp": 10
 }
