@@ -14,7 +14,21 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+/* XP Progress Bar */
+#thoughtquest-xp-bar {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    width: 200px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    overflow: hidden;
+}
 
-body {
-color: red;
+#thoughtquest-xp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff9800, #ffcc00);
+    transition: width 0.5s ease-in-out;
 }
